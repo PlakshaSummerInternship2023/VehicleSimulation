@@ -51,8 +51,8 @@ class PhysicsAttributes(SimObject):
         self.raw_forces = []
         self.raw_momentums = []
 
-    def __call__ (self, delta, forces):
-        self.net_force = np.sum(forces)
+    def __call__ (self, delta:np.float32, forces:list):
+        self.net_force = np.sum(forces)*delta
 
 
 if __name__ == "__main__":

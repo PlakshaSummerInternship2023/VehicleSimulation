@@ -16,7 +16,7 @@ class Body(SimObject):
                 mass, scale)
         self.thrusters = thrusters
     
-    def __call__ (self, delta, pwm_values):
+    def __call__ (self, delta:np.float32, pwm_values:list):
         tnp = zip(self.thrusters, pwm_values)
         forces = [thrust(pwm) for thrust, pwm in tnp]
     

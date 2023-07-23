@@ -27,6 +27,7 @@ class Body(SimObject):
     def show(self):
         pass
     
+    @staticmethod
     def from_config(cls, fname):
         pass
 

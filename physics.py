@@ -34,9 +34,10 @@ raw_momentums : list[np.ndarray]
     are np.ndarray
 
 """
+
+
 class PhysicsAttributes(SimObject):
-    def __init__(self, dimension:int, mass:float, 
-            scale:np.ndarray):
+    def __init__(self, dimension: int, mass: float, scale: np.ndarray):
         super().__init__(dimension)
 
         self.mass = mass
@@ -51,12 +52,16 @@ class PhysicsAttributes(SimObject):
         self.raw_forces = []
         self.raw_momentums = []
 
-    def __call__ (self, delta:np.float32, forces:list):
-        self.net_force = np.sum(forces)*delta
+    def __call__(self, delta: np.float32, forces: list):
+        self.net_force = np.sum(forces) * delta
+
+    def simulate(self, thrusters, forces):
+        # todo
+        pass
 
 
 if __name__ == "__main__":
-    testbanner("physics.py")
+    testbanner()
 
     #####
     # write tests

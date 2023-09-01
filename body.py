@@ -2,7 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from utils import SimObject, testbanner
+from utils import can_eval, input_error_check
 from physics import PhysicsAttributes
+from render_engine import RenderEngine
 
 
 class Body(SimObject):
@@ -26,6 +28,7 @@ class Body(SimObject):
         self.thrusters = thrusters
 
         self.line_width = line_width
+        self.render_engine = RenderEngine(dimension)
 
     def __call__(self, delta: np.float32, pwm_values: list, simulate=False):
         tnp = zip(self.thrusters, pwm_values)
@@ -39,36 +42,53 @@ class Body(SimObject):
         pass
 
     def show(self):
-        for i, j in self.edges:
-            (x1, y1), (x2, y2) = tuple(self.vertices[i]), tuple(self.vertices[j])
-
-            line = plt.Line2D((x1, x2), (y1, y2), lw=self.line_width)
-            plt.gca().add_line(line)
-        for thruster in self.thrusters:
-            (x, y), (dx, dy) = tuple(thruster.location), tuple(thruster.direction)
-            plt.arrow(x, y, dx, dy, width=self.line_width / 25, color="red")
-        plt.axis("scaled")
-        plt.show()
+        self.render_engine.render(self)
 
     @staticmethod
-    def from_config(cls, fname):
-        pass
+    def from_config(file_name: str):
+        with open(file_name) as f:
+            file = [i.strip() for i in f.readlines() if i != '\n']
 
+        dimension = int(file[0])
+        edges = {}
+        vertices = {}
+        for line in file:
+            marker, *other = line.split(" ") # marker is to check whether it is a vertex or edge
+            # "other" stores the point_name and coords
+
+            other = [can_eval(i) for i in other] # evaluates any strings into floats 
+            if marker == "v":
+                point_name, *coord = other[-4:] 
+                # -4 is the index where the point name starts, followed by any coordinates 
+                input_error_check(coord)
+                # checks for any unforseen values amongst the coordinates
+
+                vertices[point_name] = np.array(coord)
+            elif marker == "e":
+                edges[other[-2]] = other[-1] # point 1 and point 2
+
+        return Body(dimension, vertices, edges)
+
+    def polygon_generator(self): # TAKES FUNCTION AS ARGUEMENT, PUT YOUR DRAWING FUNCTION HERE
+        vertices = self.phys_attributes.global_vertices(self.vertices)
+        edges = self.edges
+
+        for i in edges:
+            base_coords = vertices[i]
+            connected_coords = vertices[edges[i]]
+
+            yield (base_coords, connected_coords)
 
 def __2dtests__():
     from thruster import Thruster
 
     thruster = Thruster(2, np.array([0, -1]), np.array([3, 0]))
-    body = Body(
-        2,
-        vertices=[np.array([0, 0]), np.array([3, 3]), np.array([6, 0])],
-        edges=[(0, 1), (1, 2), (2, 0)],
-        thrusters=[thruster],
-    )
+    body = Body.from_config("./assets/pentagon.obj")
     print("creating Body object [PASSED]")
     print("testing show for 2d model")
 
-    body.show()
+    while 1:
+        body.show()
 
 
 if __name__ == "__main__":

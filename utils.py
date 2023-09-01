@@ -46,6 +46,23 @@ def testbanner():
     print(f"running tests for {sys.argv[0]}")
 
 
+
+def can_eval(expr): # DOES NOT THROW EXCEPTION FOR ERRORS
+    try:
+        return eval(expr)
+    except NameError:
+        return expr
+
+def input_error_check(coords):
+    error_val = ""
+    try:
+        for error_val in coords:
+            float(error_val)
+        return
+    except ValueError:
+        raise ValueError("There is a mistake in the file input, search term: ", error_val)
+
+
 if __name__ == "__main__":
     testbanner()
 
